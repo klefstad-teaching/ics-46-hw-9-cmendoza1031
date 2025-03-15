@@ -31,6 +31,9 @@ void error(string word1, string word2, string msg) {
 bool edit_distance_within(const std::string& str1, const std::string& str2, int d) {
 // Use the concept of edit distance to compare words to see if they are neighbors. https://en.wikipedia.org/wiki/Edit_distance
 //(the lengths are either the same or differ by one character between neighbor words.)
+    // If strings are identical, edit distance is 0, which is within any non-negative d
+    if (str1 == str2) return d >= 0; // NEW
+
     int str1_size = str1.size();
     int str2_size = str2.size();
 
@@ -47,7 +50,9 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
             if (differences > d)
                 return false;
         }
-        return true;
+        //return true;
+        // For word ladder with d=1, we need exactly one difference
+        return d == 1 ? differences == 1 : differences <= d; // NEW
     }
 
     // Case 2: Different length words - check for insertion/deletion

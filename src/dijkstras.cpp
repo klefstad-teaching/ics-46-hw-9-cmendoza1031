@@ -117,6 +117,12 @@ vector<int> dijkstra_shortest_path(const Graph& G, int source, vector<int>& prev
 vector<int> extract_shortest_path(const vector<int>& /*distances*/, const vector<int>& previous, int destination) {
     vector<int> path;
 
+    // If destination is the source, just return the source
+    if (destination == 0) { // NEW
+        path.push_back(0);
+        return path;
+    }
+
     // if destination isn't reachable
     if (previous[destination] == -1 && destination != 0)
         return path;
@@ -124,6 +130,8 @@ vector<int> extract_shortest_path(const vector<int>& /*distances*/, const vector
     // Reconstruct path
     for (int at = destination; at != -1; at = previous[at]) {
         path.push_back(at);
+
+        if (at == 0) break; // NEW
     }
 
     reverse(path.begin(), path.end());
