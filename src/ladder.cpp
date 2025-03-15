@@ -108,6 +108,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         error(begin_word, end_word, "End word must be in the dictionary.");
         return {};
     }
+    
     // Queue to store partial ladders
     queue<vector<string>> ladder_queue;
     ladder_queue.push({begin_word});
@@ -115,21 +116,23 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     set<string> visited;
     visited.insert(begin_word);
 
-    // OPTIMIZATION: Create filtered_word_list containing only words of similar length
-    // since we know edit distance requires words to differ by at most 1 in length
-    set<string> filtered_word_list;
-    size_t begin_len = begin_word.size();
-    size_t end_len = end_word.size();
+    // FIXED: Better filtering logic that won't exclude intermediate words
+    // Calculate the minimum and maximum possible word lengths in the ladder
+    size_t min_len = min(begin_word.size(), end_word.size());
+    size_t max_len = max(begin_word.size(), end_word.size());
     
+    // The maximum length difference in a ladder can be the path length
+    // For safety, we'll use a generous range
+    size_t max_diff = max_len - min_len + 5; // Add buffer
+    
+    set<string> filtered_word_list;
     for (const string& word : word_list) {
         size_t len = word.size();
-        if (len >= begin_len - 1 && len <= begin_len + 1) {
-            filtered_word_list.insert(word);
-        } else if (len >= end_len - 1 && len <= end_len + 1) {
+        // Include words of any reasonable length that might appear in the ladder
+        if (len >= min_len - max_diff && len <= max_len + max_diff) {
             filtered_word_list.insert(word);
         }
     }
-
 
     while (!ladder_queue.empty()) {
         vector<string> ladder = ladder_queue.front();
@@ -140,13 +143,9 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         if (last_word == end_word)
             return ladder;
 
-        // instead of checking every word in dictionary
-        // only check words that would be adjacent
-
         size_t last_len = last_word.size();
 
         for (const string& word : filtered_word_list) {
-            // skip words guarenteed not to be adjacent based on len
             size_t word_len = word.size();
             if (abs((int)(word_len - last_len)) > 1)
                 continue;
@@ -156,7 +155,6 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                 continue;
 
             if (is_adjacent(last_word, word)) {
-                // if words are adjacent and word is not in visited (find() returns end())
                 vector<string> new_ladder = ladder; // make copy of ladder
                 new_ladder.push_back(word);
                 if (word == end_word)
