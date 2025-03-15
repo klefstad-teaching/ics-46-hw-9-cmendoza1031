@@ -118,18 +118,16 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
 
     // FIXED: Better filtering logic that won't exclude intermediate words
     // Calculate the minimum and maximum possible word lengths in the ladder
-    size_t min_len = min(begin_word.size(), end_word.size());
-    size_t max_len = max(begin_word.size(), end_word.size());
-    
-    // The maximum length difference in a ladder can be the path length
-    // For safety, we'll use a generous range
-    size_t max_diff = max_len - min_len + 5; // Add buffer
-    
+    int min_len = static_cast<int>(min(begin_word.size(), end_word.size()));
+    int max_len = static_cast<int>(max(begin_word.size(), end_word.size()));
+    int max_diff = max_len - min_len + 5; // Add buffer
+
     set<string> filtered_word_list;
     for (const string& word : word_list) {
-        size_t len = word.size();
-        // Include words of any reasonable length that might appear in the ladder
-        if (len >= min_len - max_diff && len <= max_len + max_diff) {
+        int len = static_cast<int>(word.size());
+        int lower_bound = min_len - max_diff;
+        if(lower_bound < 0) lower_bound = 0;
+        if (len >= lower_bound && len <= max_len + max_diff) {
             filtered_word_list.insert(word);
         }
     }
