@@ -57,18 +57,32 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
 
     // Case 2: Different length words - check for insertion/deletion
     // Ensure shorter and longer are correctly assigned
-    const string& shorter = (str1_size < str2_size) ? str1 : str2;
-    const string& longer = (str1_size < str2_size) ? str2 : str1;
-    
-    // Try removing each character from the longer string to match the shorter
-    size_t size_longer = longer.size();
-    for (size_t i = 0; i < size_longer; ++i) {
-        string modified = longer;
-        modified.erase(i, 1);
-        if (modified == shorter)
-            return true;
-    }
+    if (d == 1) {
+        const string& shorter = (str1_size < str2_size) ? str1 : str2;
+        const string& longer = (str1_size < str2_size) ? str2 : str1;
 
+        size_t longer_size = longer.size();
+        size_t shorter_size = shorter.size();
+
+        if (longer_size - shorter_size != 1)
+            return false;
+
+        // check if longer is shorter w one additional letter
+        size_t i = 0, j=0;
+        bool found_diff = false;
+
+        while (i < shorter_size && j < longer_size) {
+            if (shorter[i] != longer[j]) {
+                if (found_diff) return false; 
+                found_diff = true;
+                ++j;
+            } else {
+                ++i;
+                ++j;
+            }
+        }
+        return true;
+    }
     return false;
 }
 
@@ -101,25 +115,54 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     set<string> visited;
     visited.insert(begin_word);
 
+    // OPTIMIZATION: Create filtered_word_list containing only words of similar length
+    // since we know edit distance requires words to differ by at most 1 in length
+    set<string> filtered_word_list;
+    size_t begin_len = begin_word.size();
+    size_t end_len = end_word.size();
+    
+    for (const string& word : word_list) {
+        size_t len = word.size();
+        if (len >= begin_len - 1 && len <= begin_len + 1) {
+            filtered_word_list.insert(word);
+        } else if (len >= end_len - 1 && len <= end_len + 1) {
+            filtered_word_list.insert(word);
+        }
+    }
+
+
     while (!ladder_queue.empty()) {
         vector<string> ladder = ladder_queue.front();
         ladder_queue.pop();
 
         string last_word = ladder.back();
 
-        for (const string& word : word_list) {
+        if (last_word == end_word)
+            return ladder;
+
+        // instead of checking every word in dictionary
+        // only check words that would be adjacent
+
+        size_t last_len = last_word.size();
+
+        for (const string& word : filtered_word_list) {
+            // skip words guarenteed not to be adjacent based on len
+            size_t word_len = word.size();
+            if (abs((int)(word_len - last_len)) > 1)
+                continue;
+
             // Skip already visited words
             if (visited.find(word) != visited.end())
                 continue;
 
             if (is_adjacent(last_word, word)) {
                 // if words are adjacent and word is not in visited (find() returns end())
-                visited.insert(word);
                 vector<string> new_ladder = ladder; // make copy of ladder
                 new_ladder.push_back(word);
                 if (word == end_word)
                     return new_ladder;
-
+                
+                visited.insert(word);
                 ladder_queue.push(new_ladder);
             }
         }
