@@ -107,7 +107,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
             if (visited.find(word) != visited.end())
                 continue;
 
-            if (is_adjacent(begin_word, end_word)) {
+            if (is_adjacent(last_word, word)) {
                 // if words are adjacent and word is not in visited (find() returns end())
                 visited.insert(word);
                 vector<string> new_ladder = ladder; // make copy of ladder
@@ -162,17 +162,18 @@ void load_words(set<string> & word_list, const string& file_name) {
 
 void print_word_ladder(const vector<string>& ladder) {
     if (ladder.empty()) {
-        cout << "No ladder found." << endl;
+        cout << "No word ladder found." << endl;
         return;
     }
     
+    cout << "Word ladder found: ";
     size_t ladder_size = ladder.size();
     for (size_t i = 0; i < ladder_size; ++i) {
         cout << ladder[i];
         if (i < ladder_size - 1)
-            cout << " → ";
+            cout << " ";
     }
-    cout << endl;
+    cout << " " << endl;
 }
 
 void verify_word_ladder() {

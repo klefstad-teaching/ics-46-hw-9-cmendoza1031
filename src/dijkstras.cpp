@@ -132,21 +132,21 @@ vector<int> extract_shortest_path(const vector<int>& /*distances*/, const vector
 }
 void print_path(const vector<int>& v, int total) {
     if (v.empty()) {
-        cout << "No path exists." << endl;
+        cout << "\nTotal cost is " << total << endl;
         return;
     }
-    cout << "Path: ";
-    size_t path_size = v.size();
-    for (size_t i = 0; i < path_size; ++i) {
+    
+    // Print path without "Path:" prefix and with spaces instead of arrows
+    for (size_t i = 0; i < v.size(); ++i) {
         cout << v[i];
-        if (i < path_size - 1) {
-            cout << " → ";
+        if (i < v.size() - 1) {
+            cout << " ";
         }
     }
-
-    cout << "(Total cost: " << total << ")" << endl;
+    
+    // Print total cost on a new line
+    cout << " \nTotal cost is " << total << endl;
 }
-
 /*
 Here is pseudocode for Disjkstra’s algorithm:
 struct Node:
